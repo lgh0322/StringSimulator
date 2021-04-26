@@ -27,7 +27,7 @@ class StringSurfaceView : SurfaceView, Runnable {
 
     val coe1=1000f
 
-    val frictionCoe=0.00008f
+    val frictionCoe=0.0008f
 
 
     val temp=coe1*(dt/dx)*(dt/dx)
@@ -55,10 +55,10 @@ class StringSurfaceView : SurfaceView, Runnable {
 
 
     init {
-        for(k in 0 until drawSize){
-            stringNow[k]=Math.sin(k.toFloat()/drawSize*20*Math.PI).toFloat()*200
-            stringPast[k]=Math.sin(k.toFloat()/drawSize*20*Math.PI).toFloat()*200
-        }
+//        for(k in 0 until drawSize){
+//            stringNow[k]=Math.sin(k.toFloat()/drawSize*20*Math.PI).toFloat()*200
+//            stringPast[k]=Math.sin(k.toFloat()/drawSize*20*Math.PI).toFloat()*200
+//        }
 
 
     }
@@ -114,25 +114,28 @@ class StringSurfaceView : SurfaceView, Runnable {
         wavePath.moveTo(0f,height/2-stringNow[0])
 
         for((index,k) in stringNow.withIndex()){
-            wavePath.lineTo(width.toFloat()/(drawSize)*index,height/2-k)
+            wavePath.lineTo(width.toFloat()/(drawSize)*index,height/2+k)
         }
         canvas.drawPath(wavePath,wavePaint)
 
-        for(k in 1 until drawSize-1){
-            val v=stringNow[k]-stringPast[k]
-            force[k]=friction*v*v.abs()
+        for(j in 0 until 10){
+            for(k in 1 until drawSize-1){
+                val v=stringNow[k]-stringPast[k]
+                force[k]=friction*v*v.abs()
+            }
+
+            force[cur]=force[cur]+edi
+
+            for(k in 1 until drawSize-1){
+                stringFuture[k]=temp*(stringNow[k+1]+stringNow[k-1]-2*stringNow[k])+dt2*force[k]+2*stringNow[k]-stringPast[k]
+            }
+
+            for(k in 0 until drawSize){
+                stringPast[k]=stringNow[k]
+                stringNow[k]=stringFuture[k]
+            }
         }
 
-
-
-        for(k in 1 until drawSize-1){
-            stringFuture[k]=temp*(stringNow[k+1]+stringNow[k-1]-2*stringNow[k])+dt2*force[k]+2*stringNow[k]-stringPast[k]
-        }
-
-        for(k in 0 until drawSize){
-            stringPast[k]=stringNow[k]
-            stringNow[k]=stringFuture[k]
-        }
 
 
 
@@ -140,27 +143,7 @@ class StringSurfaceView : SurfaceView, Runnable {
     }
 
 
-    private fun onDrawX() {
 
-
-        for(k in 1 until drawSize-1){
-            val v=stringNow[k]-stringPast[k]
-            force[k]=friction*v*v.abs()
-        }
-
-
-
-        for(k in 1 until drawSize-1){
-            stringFuture[k]=temp*(stringNow[k+1]+stringNow[k-1]-2*stringNow[k])+dt2*force[k]+2*stringNow[k]-stringPast[k]
-        }
-
-        for(k in 0 until drawSize){
-            stringPast[k]=stringNow[k]
-            stringNow[k]=stringFuture[k]
-        }
-
-
-    }
 
 
 
@@ -188,25 +171,25 @@ class StringSurfaceView : SurfaceView, Runnable {
                 val m = surfaceHolder.lockCanvas()
                 onDrawX(m)
                 surfaceHolder.unlockCanvasAndPost(m)
-            }else{
-                onDrawX()
-                sleep(1)
             }
         }
     }
 
     var x1 = 0f
     var y1 = 0f
+    var edi=0f
+    var cur=0
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 x1 = event.x
                 y1 = event.y
-
+               edi=(y1-height/2)/100
+                cur=(x1*drawSize/width).toInt()
             }
 
             MotionEvent.ACTION_UP -> {
-
+                edi=0f
             }
 
             MotionEvent.ACTION_MOVE -> {
