@@ -22,15 +22,19 @@ class StringSurfaceView : SurfaceView, Runnable {
 
     val drawSize = 500
 
-    val dt=48f
+    val dt=1f
     val dx=50f
-    val a=1f
-    val b=0.00001f
+
+    val coe1=1000f
+
+    val frictionCoe=0.00008f
 
 
-    val C=a*(dt/dx)*(dt/dx)
-    val D=dt*dt
-    val F=-b/(dt*dt)
+    val temp=coe1*(dt/dx)*(dt/dx)
+
+    val dt2=dt*dt
+
+    val friction=-frictionCoe/(dt*dt)
 
     val force=FloatArray(drawSize){
         0f
@@ -116,13 +120,13 @@ class StringSurfaceView : SurfaceView, Runnable {
 
         for(k in 1 until drawSize-1){
             val v=stringNow[k]-stringPast[k]
-            force[k]=F*v*v.abs()
+            force[k]=friction*v*v.abs()
         }
 
 
 
         for(k in 1 until drawSize-1){
-            stringFuture[k]=C*(stringNow[k+1]+stringNow[k-1]-2*stringNow[k])+D*force[k]+2*stringNow[k]-stringPast[k]
+            stringFuture[k]=temp*(stringNow[k+1]+stringNow[k-1]-2*stringNow[k])+dt2*force[k]+2*stringNow[k]-stringPast[k]
         }
 
         for(k in 0 until drawSize){
@@ -141,13 +145,13 @@ class StringSurfaceView : SurfaceView, Runnable {
 
         for(k in 1 until drawSize-1){
             val v=stringNow[k]-stringPast[k]
-            force[k]=F*v*v.abs()
+            force[k]=friction*v*v.abs()
         }
 
 
 
         for(k in 1 until drawSize-1){
-            stringFuture[k]=C*(stringNow[k+1]+stringNow[k-1]-2*stringNow[k])+D*force[k]+2*stringNow[k]-stringPast[k]
+            stringFuture[k]=temp*(stringNow[k+1]+stringNow[k-1]-2*stringNow[k])+dt2*force[k]+2*stringNow[k]-stringPast[k]
         }
 
         for(k in 0 until drawSize){
